@@ -2,6 +2,7 @@ import discord
 import json
 import os
 import dotenv
+import asyncio
 from .rcon_client import RconClient
 
 
@@ -17,11 +18,17 @@ rcon = RconClient(host, port, password)
 
 bot_intents = discord.Intents.default()
 bot_intents.message_content = True
-bot_intents.members = True
+bot_intents.members = Trues
 bot_intents.presences = True
 
 client = discord.Client(intents=bot_intents)
 
+
+async def get_player_count():
+    while True:
+        response = rcon.send_command("list")
+        online = response
+        await client.change_presence(activity=discord.Game("players_online"))
 
 @client.event
 async def on_ready():
