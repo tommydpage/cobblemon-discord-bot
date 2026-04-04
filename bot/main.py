@@ -1,9 +1,9 @@
 import discord
 import json
 import os
-import asyncio
 import dotenv
 from .rcon_client import RconClient
+
 
 dotenv.load_dotenv(override=True)
 token = os.getenv("DISCORD_TOKEN")
@@ -22,12 +22,16 @@ bot_intents.presences = True
 
 client = discord.Client(intents=bot_intents)
 
+
 @client.event
 async def on_ready():
-    if await rcon.connect():
-        print("connected")
-    else:
-        print("failed to connect")
+    try:
+        if await rcon.connect():
+            print("Connected to RCON client.")
+        else:
+            print("RCON authentication failed - check password.")
+    except Exception as e:
+        print(f"Failed to connect to RCON Client: {e}")
 
 @client.event
 async def on_message(message):
@@ -35,19 +39,31 @@ async def on_message(message):
         return
     
     if message.channel.id == console_channel_id:
-        response = await rcon.send_command(message.content.lstrip("/"))
-        await message.channel.send(response)
+        try:
+            response = await rcon.send_command(message.content.lstrip("/"))
+        except Exception as e:
+            await message.channel.send(f"Failed to send RCON command: {e}")
+            return
+        
+        try:
+            await message.channel.send(response)
+        except Exception as e:
+            print(f"Failed to send message to Discord: {e}")
 
     if message.channel.id == events_channel_id:
 
-        # Format discord message for Minecraft in game chat
+        # Format discord message for Minecraft in-game chat
         tellraw_payload = json.dumps([
             {"text": "[Discord] ", "color": "blue"},
             {"text": f"{message.author.display_name}"},
             {"text": f": {message.content}"}
         ])
         
-        response = await rcon.send_command(f"tellraw @a {tellraw_payload}")
+        try:
+            await rcon.send_command(f"tellraw @a {tellraw_payload}")
+        except Exception as e:
+            await message.channel.send(f"Failed to send message to game: {e}")
 
 
-client.run(token)
+if __name__ == "__main__":
+    client.run(token)
