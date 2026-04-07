@@ -46,12 +46,15 @@ class RconClient:
 
     async def send_command(self, payload):
         command = build_packet(self.request_id_counter, 2, payload)
-        self.writer.write(command)
-        await self.writer.drain()
+        if self.writer:
+            self.writer.write(command)
+            await self.writer.drain()
 
-        _, response_payload = parse_response(await self.reader.read(4096))
-        self.request_id_counter += 1
-        return response_payload
+            _, response_payload = parse_response(await self.reader.read(4096))
+            self.request_id_counter += 1
+            return response_payload
+        else:
+            raise ConnectionError("RCON not connected")
     
     async def disconnect(self):
         self.writer.close()

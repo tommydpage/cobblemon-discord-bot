@@ -36,6 +36,7 @@ async def update_player_count():
             players_online, players_max = parse_list(await rcon.send_command("list"))
         except Exception as e:
             print(f"RCON connection no longer active: {e}")
+            await connect_rcon()
             await asyncio.sleep(30)
             continue
         
@@ -43,25 +44,30 @@ async def update_player_count():
             await client.change_presence(activity=discord.Game(f"{players_online}/{players_max} Players on the server."))
         except Exception as e:
             print(f"Unable to update Bot Status: {e}")
-        
+
         await asyncio.sleep(10)
 
-@client.event
-async def on_ready():
-    asyncio.create_task(read_log(client))
-
+async def connect_rcon():
     while True:
         try:
             if await rcon.connect():
                 print("Connected to RCON client.")
-                asyncio.create_task(update_player_count())
+                status = True
                 break
             else:
                 print("RCON authentication failed - check password.")
+                status = False
                 break
         except Exception as e:
             print(f"Waiting for RCON Client: {e}")
             await asyncio.sleep(10)
+    return status
+
+@client.event
+async def on_ready():
+    asyncio.create_task(read_log(client))
+    await connect_rcon()
+    asyncio.create_task(update_player_count())
 
 @client.event
 async def on_message(message):
@@ -72,7 +78,11 @@ async def on_message(message):
         try:
             response = await rcon.send_command(message.content.lstrip("/"))
         except Exception as e:
-            await message.channel.send(f"Failed to send RCON command: {e}")
+            await message.channel.send("Failed to send RCON command, restoring connection...")
+            if await connect_rcon():
+                await message.channel.send("RCON connection restored. Try your command again.")
+            else:
+                await message.channel.send("RCON Connection failed: check password.")
             return
         
         try:
@@ -91,7 +101,12 @@ async def on_message(message):
         try:
             await rcon.send_command(f"tellraw @a {tellraw_payload}")
         except Exception as e:
-            await message.channel.send(f"Failed to send message to game: {e}")
+            await message.channel.send("Message failed. Restoring connection to game chat...")
+            if await connect_rcon():
+                await message.channel.send("Game chat connection restored. Try your message again.")
+            else:
+                await message.channel.send("Game chat connection failed. Tell an admin!")
+            return
 
 
 if __name__ == "__main__":
