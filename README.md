@@ -2,14 +2,20 @@
 
 A custom Discord bot for my Cobblemon Minecraft server (Fabric 1.21.1), providing event notifications, player tracking, and remote console access via RCON.
 
+## Features 
+- Live player count as Discord bot status
+- Private RCON console channel in Discord
+    - Filtered console readout
+    - Send server commands from Discord
+- Events channel in Discord for all players
+    - Echo chats between events channel and in-game chat to allow players and server members to communicate directly
+
 ## Features (planned)
-- Server start/stop notifications
-- Player join/leave messages
-- Player death announcements
-- Player achievement announcements
-- Cobblemon spawn notifications (legendary/shiny/etc)
-- Live player count as bot status
-- Private RCON console channel for server administration
+- In-game event monitoring
+    - Server start/stop notifications
+    - Player join/leave messages
+    - Player death announcements
+    - Player achievement announcements
 
 ## Tech Stack
 - Python 3
@@ -17,6 +23,10 @@ A custom Discord bot for my Cobblemon Minecraft server (Fabric 1.21.1), providin
 - RCON
 - Docker
 - Runs alongside existing Minecraft server infrastructure
+
+## Optional integrations
+- Mod: Cobblemon Spawn Notification by tmetcalfe89 - https://modrinth.com/mod/cobblemon-spawn-notification
+    - Add Legendary and Shiny spawn notifications to events channel
 
 ## Setup
 Coming soon.
