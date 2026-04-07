@@ -1,12 +1,3 @@
-"""
-RCON client for Minecraft server communication.
-
-Implements the Source RCON protocol over TCP to send commands
-to the Minecraft server and receive responses.
-
-Protocol spec: https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
-"""
-
 import asyncio
 import struct
 import logging
