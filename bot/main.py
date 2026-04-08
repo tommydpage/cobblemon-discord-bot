@@ -24,6 +24,8 @@ bot_intents.presences = True
 
 client = discord.Client(intents=bot_intents)
 
+log_reader = False
+player_counter = False
 
 # Player list is received in the format "There are X of a max of Y players online: [players]"
 def parse_list(response):
@@ -63,11 +65,18 @@ async def connect_rcon():
             await asyncio.sleep(10)
     return status
 
+async def setup_hook():
+    asyncio.create_task(read_log(client))
+    asyncio.create_task(update_player_count())
+client.setup_hook = setup_hook
+
 @client.event
 async def on_ready():
-    asyncio.create_task(read_log(client))
-    await connect_rcon()
-    asyncio.create_task(update_player_count())
+    while True:
+        if await connect_rcon():
+            break
+        else:
+            await asyncio.sleep(10)
 
 @client.event
 async def on_message(message):
