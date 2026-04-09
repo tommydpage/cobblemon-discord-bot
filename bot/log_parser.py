@@ -5,6 +5,7 @@ from .filters import BLACKLIST, DEATH_MESSAGES
 
 
 async def read_log(client):
+    await client.wait_until_ready()
 
     console_channel = client.get_channel(int(os.getenv("CONSOLE_CHANNEL_ID")))
     events_channel = client.get_channel(int(os.getenv("EVENTS_CHANNEL_ID")))
